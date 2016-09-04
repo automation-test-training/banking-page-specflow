@@ -82,7 +82,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>AccountFeature.feature</DependentUpon>
     </Compile>
-    <Compile Include="AccountSteps.cs" />
+    <Compile Include="Pages\AccountPage.cs" />
+    <Compile Include="Steps\AccountSteps.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +95,9 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

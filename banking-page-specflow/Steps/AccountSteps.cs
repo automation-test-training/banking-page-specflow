@@ -21,6 +21,11 @@ namespace banking_page_specflow
         public void Setup()
         {
             driver = new FirefoxDriver();
+            OpenHomePage();
+        }
+
+        private void OpenHomePage()
+        {
             driver.Navigate().GoToUrl("http://10.211.55.2:8100/?ionicplatform=ios#/app/account");
             WaitForContentIsVisible();
         }
@@ -34,25 +39,34 @@ namespace banking_page_specflow
         [Given(@"a user has (.*) accounts")]
         public void GivenAUserHasAccounts(int p0)
         {
-            driver.FindElement(By.CssSelector("div.nav-bar-block[nav-bar=\"active\"]"))
-                .FindElement(By.CssSelector("button.button.button-icon.button-clear.ion-navicon")).Click();
+            OpenSideMenu();
 
-            WaitForSideMenuIsVisible();
-
-            var items = driver.FindElement(By.CssSelector("ion-side-menu"))
-                .FindElement(By.CssSelector("ion-list"))
-                .FindElements(By.CssSelector("ion-item"));
-
-            var menu = from item in items where item.Text == "Login" select item;
-            menu.ElementAt(0).Click();
+            ClickMenuItemByText("Login");
 
             WaitForModalIsVisible();
-
             var select = new SelectElement(driver.FindElement(By.CssSelector("ion-modal-view"))
                 .FindElement(By.CssSelector("select")));
             select.SelectByText("heaton");
             driver.FindElement(By.CssSelector("ion-modal-view"))
                 .FindElement(By.CssSelector("form")).Submit();
+        }
+
+        private void ClickMenuItemByText(String itemText)
+        {
+            var items = driver.FindElement(By.CssSelector("ion-side-menu"))
+                .FindElement(By.CssSelector("ion-list"))
+                .FindElements(By.CssSelector("ion-item"));
+
+            var menu = from item in items where item.Text == itemText select item;
+            menu.ElementAt(0).Click();
+        }
+
+        private void OpenSideMenu()
+        {
+            driver.FindElement(By.CssSelector("div.nav-bar-block[nav-bar=\"active\"]"))
+                .FindElement(By.CssSelector("button.button.button-icon.button-clear.ion-navicon")).Click();
+
+            WaitForSideMenuIsVisible();
         }
 
         [When(@"I refresh account")]
@@ -66,28 +80,27 @@ namespace banking_page_specflow
         public void ThenIShouldSeeAccountsAndBalances(Table table)
         {
 
-            var accounts = driver.FindElement(By.CssSelector("ion-side-menu-content"))
+            var accountInfoList = driver.FindElement(By.CssSelector("ion-side-menu-content"))
                 .FindElement(By.CssSelector("ion-content"))
                 .FindElement(By.CssSelector("ion-list"))
                 .FindElements(By.CssSelector("ion-item"));
 
-            var cols0 = accounts.ElementAt(0)
-                .FindElements(By.CssSelector("div"));
-
-            var row0 = table.Rows.ElementAt(0);
-            Assert.AreEqual(cols0.Count, 3);
-            Assert.AreEqual(cols0.ElementAt(0).Text, row0["account"]);
-            Assert.AreEqual(cols0.ElementAt(1).Text, row0["cny balance"]);
-            Assert.AreEqual(cols0.ElementAt(2).Text, row0["usd balance"]);
+            var account0Info = accountInfoList.ElementAt(0).FindElements(By.CssSelector("div"));
+            Assert.AreEqual(account0Info.Count, 3);
+            AssertAccountInfoShouldMatchRow(account0Info, table.Rows.ElementAt(0));
 
 
-            var cols1 = accounts.ElementAt(1)
-                .FindElements(By.CssSelector("div"));
+            var account1Info = accountInfoList.ElementAt(1).FindElements(By.CssSelector("div"));
+            Assert.AreEqual(account1Info.Count, 2);
+            AssertAccountInfoShouldMatchRow(account1Info, table.Rows.ElementAt(1));
+        }
 
-            var row1 = table.Rows.ElementAt(1);
-            Assert.AreEqual(cols1.Count, 2);
-            Assert.AreEqual(cols1.ElementAt(0).Text, row1["account"]);
-            Assert.AreEqual(cols1.ElementAt(1).Text, row1["cny balance"]);
+        private static void AssertAccountInfoShouldMatchRow(ReadOnlyCollection<IWebElement> account1Info, TableRow expectedAccount1Info)
+        {
+            for (int i = 0; i < account1Info.Count; i++)
+            {
+                Assert.AreEqual(account1Info.ElementAt(i).Text, expectedAccount1Info.ElementAt(i).Value);
+            }
         }
 
         private void WaitForContentIsVisible()
