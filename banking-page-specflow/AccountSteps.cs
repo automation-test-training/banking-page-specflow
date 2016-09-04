@@ -22,6 +22,7 @@ namespace banking_page_specflow
         {
             driver = new FirefoxDriver();
             driver.Navigate().GoToUrl("http://10.211.55.2:8100/?ionicplatform=ios#/app/account");
+            WaitForContentIsVisible();
         }
 
         [AfterScenario()]
@@ -33,22 +34,19 @@ namespace banking_page_specflow
         [Given(@"a user has (.*) accounts")]
         public void GivenAUserHasAccounts(int p0)
         {
-            Thread.Sleep(3000);
             driver.FindElement(By.CssSelector("div.nav-bar-block[nav-bar=\"active\"]"))
                 .FindElement(By.CssSelector("button.button.button-icon.button-clear.ion-navicon")).Click();
 
-            Thread.Sleep(3000);
-
+            WaitForSideMenuIsVisible();
 
             var items = driver.FindElement(By.CssSelector("ion-side-menu"))
                 .FindElement(By.CssSelector("ion-list"))
                 .FindElements(By.CssSelector("ion-item"));
 
-
             var menu = from item in items where item.Text == "Login" select item;
             menu.ElementAt(0).Click();
 
-            Thread.Sleep(3000);
+            WaitForModalIsVisible();
 
             var select = new SelectElement(driver.FindElement(By.CssSelector("ion-modal-view"))
                 .FindElement(By.CssSelector("select")));
@@ -61,12 +59,13 @@ namespace banking_page_specflow
         public void WhenIRefreshAccount()
         {
             driver.Navigate().Refresh();
-            Thread.Sleep(3000);
+            WaitForContentIsVisible();
         }
 
         [Then(@"I should see accounts and balances:")]
         public void ThenIShouldSeeAccountsAndBalances(Table table)
         {
+
             var accounts = driver.FindElement(By.CssSelector("ion-side-menu-content"))
                 .FindElement(By.CssSelector("ion-content"))
                 .FindElement(By.CssSelector("ion-list"))
@@ -89,6 +88,30 @@ namespace banking_page_specflow
             Assert.AreEqual(cols1.Count, 2);
             Assert.AreEqual(cols1.ElementAt(0).Text, row1["account"]);
             Assert.AreEqual(cols1.ElementAt(1).Text, row1["cny balance"]);
+        }
+
+        private void WaitForContentIsVisible()
+        {
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector("ion-side-menu-content")));
+        }
+
+        private void WaitForsideMenuIsVisible()
+        {
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector("ion-side-menu")));
+        }
+
+        private void WaitForModalIsVisible()
+        {
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector("ion-modal-view")));
+        }
+
+        private void WaitForSideMenuIsVisible()
+        {
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector("ion-side-menu")));
         }
     }
 }
