@@ -3,7 +3,10 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Support.PageObjects;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Linq;
 using System.Collections.Generic;
+using TechTalk.SpecFlow;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace banking_page_specflow
 {
@@ -44,9 +47,37 @@ namespace banking_page_specflow
             return new SideMenu(driver);
         }
 
-        public IList<IWebElement> GetAccountInfoList()
+        public IEnumerable<IEnumerable<String>> GetAccountInfoList()
         {
-            return accountInfoList.FindElements(By.CssSelector("ion-item"));
+            return from accountElement in accountInfoList.FindElements(By.CssSelector("ion-item"))
+                   select GetBalanceList(accountElement);
+        }
+
+        private static IEnumerable<String> GetBalanceList(IWebElement accountElement)
+        {
+            return from balance in accountElement.FindElements(By.CssSelector("div"))
+                   select balance.Text;
+        }
+
+        public IEnumerable<IEnumerable<String>> GetAccountInfoOfCurrencyList(String currency)
+        {
+            return from accountElement in accountInfoList.FindElements(By.CssSelector("ion-item"))
+                   select GetBalanceList(accountElement, currency);
+        }
+
+        private static IEnumerable<String> GetBalanceList(IWebElement accountElement,String currency)
+        {
+            return from balance in accountElement.FindElements(By.CssSelector("div"))
+                   where !balance.Text.StartsWith("-") || balance.Text.Contains("curreny")  
+                   select balance.Text;
+        }
+
+        public static void AssertAccountInfoShouldMatchRow(IEnumerable<String> account1Info, TableRow expectedAccount1Info)
+        {
+            for (int i = 0; i < account1Info.Count(); i++)
+            {
+                Assert.AreEqual(account1Info.ElementAt(i), expectedAccount1Info.ElementAt(i).Value);
+            }
         }
     }
 }

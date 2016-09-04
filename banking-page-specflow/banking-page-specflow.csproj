@@ -86,6 +86,13 @@
     <Compile Include="Pages\BasePage.cs" />
     <Compile Include="Pages\LoginModal.cs" />
     <Compile Include="Pages\SideMenu.cs" />
+    <Compile Include="Pages\TransferPage.cs" />
+    <Compile Include="Steps\TransferSteps.cs" />
+    <Compile Include="TransferFeature.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TransferFeature.feature</DependentUpon>
+    </Compile>
     <Compile Include="Steps\AccountSteps.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -97,6 +104,10 @@
     <None Include="App.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
+    </None>
+    <None Include="TransferFeature.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>TransferFeature.feature.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>
