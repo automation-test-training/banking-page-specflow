@@ -1,14 +1,10 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Firefox;
-using TechTalk.SpecFlow;
-using System.Linq;
-using System.Threading;
-using OpenQA.Selenium.Support.UI;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Linq;
+﻿using banking_page_specflow.Pages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Firefox;
+using System.Collections.ObjectModel;
+using System.Linq;
+using TechTalk.SpecFlow;
 
 namespace banking_page_specflow
 {
@@ -21,13 +17,6 @@ namespace banking_page_specflow
         public void Setup()
         {
             driver = new FirefoxDriver();
-            OpenHomePage();
-        }
-
-        private void OpenHomePage()
-        {
-            driver.Navigate().GoToUrl("http://10.211.55.2:8100/?ionicplatform=ios#/app/account");
-            WaitForContentIsVisible();
         }
 
         [AfterScenario()]
@@ -39,51 +28,26 @@ namespace banking_page_specflow
         [Given(@"a user has (.*) accounts")]
         public void GivenAUserHasAccounts(int p0)
         {
-            OpenSideMenu();
+            var sideMenu = AccountPage.NavigateTo(driver).WaitUntilVisible()
+                .OpenSideMenu().WaitUntilVisible();
 
-            ClickMenuItemByText("Login");
+            sideMenu.ClickMenuItemByText("Login");
 
-            WaitForModalIsVisible();
-            var select = new SelectElement(driver.FindElement(By.CssSelector("ion-modal-view"))
-                .FindElement(By.CssSelector("select")));
-            select.SelectByText("heaton");
-            driver.FindElement(By.CssSelector("ion-modal-view"))
-                .FindElement(By.CssSelector("form")).Submit();
-        }
-
-        private void ClickMenuItemByText(String itemText)
-        {
-            var items = driver.FindElement(By.CssSelector("ion-side-menu"))
-                .FindElement(By.CssSelector("ion-list"))
-                .FindElements(By.CssSelector("ion-item"));
-
-            var menu = from item in items where item.Text == itemText select item;
-            menu.ElementAt(0).Click();
-        }
-
-        private void OpenSideMenu()
-        {
-            driver.FindElement(By.CssSelector("div.nav-bar-block[nav-bar=\"active\"]"))
-                .FindElement(By.CssSelector("button.button.button-icon.button-clear.ion-navicon")).Click();
-
-            WaitForSideMenuIsVisible();
+            var loginDialog = new LoginModal(driver).WaitUntilVisible();
+            loginDialog.LoginUser("heaton");
         }
 
         [When(@"I refresh account")]
         public void WhenIRefreshAccount()
         {
             driver.Navigate().Refresh();
-            WaitForContentIsVisible();
         }
 
         [Then(@"I should see accounts and balances:")]
         public void ThenIShouldSeeAccountsAndBalances(Table table)
         {
-
-            var accountInfoList = driver.FindElement(By.CssSelector("ion-side-menu-content"))
-                .FindElement(By.CssSelector("ion-content"))
-                .FindElement(By.CssSelector("ion-list"))
-                .FindElements(By.CssSelector("ion-item"));
+            var accountPage = new AccountPage(driver).WaitUntilVisible();
+            var accountInfoList = accountPage.GetAccountInfoList();
 
             var account0Info = accountInfoList.ElementAt(0).FindElements(By.CssSelector("div"));
             Assert.AreEqual(account0Info.Count, 3);
@@ -101,30 +65,6 @@ namespace banking_page_specflow
             {
                 Assert.AreEqual(account1Info.ElementAt(i).Text, expectedAccount1Info.ElementAt(i).Value);
             }
-        }
-
-        private void WaitForContentIsVisible()
-        {
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector("ion-side-menu-content")));
-        }
-
-        private void WaitForsideMenuIsVisible()
-        {
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector("ion-side-menu")));
-        }
-
-        private void WaitForModalIsVisible()
-        {
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector("ion-modal-view")));
-        }
-
-        private void WaitForSideMenuIsVisible()
-        {
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector("ion-side-menu")));
         }
     }
 }
