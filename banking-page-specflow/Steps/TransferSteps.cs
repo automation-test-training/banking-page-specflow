@@ -13,24 +13,11 @@ namespace banking_page_specflow.Steps
     [Binding]
     public class TransferSteps
     {
-        private IWebDriver driver;
-
-        [BeforeScenario()]
-        public void Setup()
-        {
-            driver = new FirefoxDriver();
-        }
-
-        [AfterScenario()]
-        public void TearDown()
-        {
-            driver.Close();
-        }
 
         [Given(@"I have accounts of ""(.*)"":")]
         public void GivenIHaveAccounts(String currency, Table table)
         {
-            var accountPage = AccountPage.NavigateTo(driver).WaitUntilVisible();
+            var accountPage = AccountPage.NavigateTo(Hooks.driver).WaitUntilVisible();
             var accountInfoList = accountPage.GetAccountInfoOfCurrencyList(currency);
 
             var account0Info = accountInfoList.ElementAt(0);
@@ -45,20 +32,20 @@ namespace banking_page_specflow.Steps
         [When(@"I transfer (.*) cny from ""(.*)"" to ""(.*)""")]
         public void WhenITransferCnyFromTo(String amount, String from, String to)
         {
-            var sideMenu = new AccountPage(driver).WaitUntilVisible().OpenSideMenu();
+            var sideMenu = new AccountPage(Hooks.driver).WaitUntilVisible().OpenSideMenu().WaitUntilVisible();
             sideMenu.ClickMenuItemByText("Transfer");
 
-            new TransferPage(driver).WaitUntilVisible().TransferInSameCurrency(amount, from, to);
+            new TransferPage(Hooks.driver).WaitUntilVisible().TransferInSameCurrency(amount, from, to);
         }
 
         [Then(@"my ""(.*)"" balance should be:")]
         public void ThenMyBalanceShouldBe(String currency, Table table)
         {
-            var sideMenu  = new TransferPage(driver).WaitUntilVisible()
+            var sideMenu = new TransferPage(Hooks.driver).WaitUntilVisible()
                 .OpenSideMenu().WaitUntilVisible();
             sideMenu.ClickMenuItemByText("Account");
 
-            var accountPage = new AccountPage(driver).WaitUntilVisible();
+            var accountPage = new AccountPage(Hooks.driver).WaitUntilVisible();
             var accountInfoList = accountPage.GetAccountInfoOfCurrencyList(currency);
 
             var account0Info = accountInfoList.ElementAt(0);

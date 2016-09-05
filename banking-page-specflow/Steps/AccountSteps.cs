@@ -13,42 +13,29 @@ namespace banking_page_specflow
     [Binding]
     public class ShowAccountsAndBalanceSteps
     {
-        private IWebDriver driver;
-
-        [BeforeScenario()]
-        public void Setup()
-        {
-            driver = new FirefoxDriver();
-        }
-
-        [AfterScenario()]
-        public void TearDown()
-        {
-            driver.Quit();
-        }
 
         [Given(@"a user has (.*) accounts")]
         public void GivenAUserHasAccounts(int p0)
         {
-            var sideMenu = AccountPage.NavigateTo(driver).WaitUntilVisible()
+            var sideMenu = AccountPage.NavigateTo(Hooks.driver).WaitUntilVisible()
                 .OpenSideMenu().WaitUntilVisible();
 
             sideMenu.ClickMenuItemByText("Login");
 
-            var loginDialog = new LoginModal(driver).WaitUntilVisible();
+            var loginDialog = new LoginModal(Hooks.driver).WaitUntilVisible();
             loginDialog.LoginUser("heaton");
         }
 
         [When(@"I refresh account")]
         public void WhenIRefreshAccount()
         {
-            driver.Navigate().Refresh();
+            Hooks.driver.Navigate().Refresh();
         }
 
         [Then(@"I should see accounts and balances:")]
         public void ThenIShouldSeeAccountsAndBalances(Table table)
         {
-            var accountPage = AccountPage.NavigateTo(driver).WaitUntilVisible();
+            var accountPage = new AccountPage(Hooks.driver).WaitUntilVisible();
             var accountInfoList = accountPage.GetAccountInfoList();
 
             var account0Info = accountInfoList.ElementAt(0);
